@@ -13,7 +13,9 @@ import java.util.Locale;
 
 public class SqlRuParse {
     public static void main(String[] args) throws Exception {
-            Document doc = Jsoup.connect("https://www.sql.ru/forum/job-offers/").get();
+        int n = 1;
+        while (n != 6) {
+            Document doc = Jsoup.connect(String.format("https://www.sql.ru/forum/job-offers/%d", n)).get();
             Elements row = doc.select(".postslisttopic");
             for (Element td : row) {
                 Element href = td.child(0);
@@ -37,6 +39,8 @@ public class SqlRuParse {
                     }
                 }
             }
+            n++;
+        }
     }
 
     private static Date transformToDate(String date) throws ParseException {
