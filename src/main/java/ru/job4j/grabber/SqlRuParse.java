@@ -1,9 +1,10 @@
-package ru.job4j.html;
+package ru.job4j.grabber;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
 import java.io.IOException;
 import java.net.URL;
 import java.text.ParseException;
@@ -12,7 +13,10 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,8 +30,8 @@ public class SqlRuParse implements Parse {
             for (Element td : row) {
                 Element href = td.child(0);
                 String url = href.attr("href");
-                String description = getDescription(href);
-                result.add(new Post(url, description));
+                String text = getDescription(href);
+                result.add(new Post(url, text));
             }
             Elements rw = doc.select(".altCol");
             List<String> dates = new ArrayList<>();
@@ -42,7 +46,7 @@ public class SqlRuParse implements Parse {
             }
             int k = 0;
             for (Post rsl : result) {
-                rsl.setDate(dates.get(k));
+                rsl.setCreated(dates.get(k));
                 k++;
             }
         } catch (IOException | ParseException e) {
@@ -58,9 +62,9 @@ public class SqlRuParse implements Parse {
         try {
             Document document = Jsoup.parse(new URL(link), 3000);
             Element table = document.select("table[class=msgTable]").first();
-            result.setDescription(table.select("td[class=msgBody]").get(1).text());
+            result.setText(table.select("td[class=msgBody]").get(1).text());
             String date = table.select("td[class=msgFooter]").get(0).text().split(" \\[")[0];
-            result.setDate(parser(date));
+            result.setCreated(parser(date));
         } catch (IOException | ParseException e) {
             e.printStackTrace();
         }

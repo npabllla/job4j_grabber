@@ -1,7 +1,5 @@
 package ru.job4j.grabber;
 
-import javafx.geometry.Pos;
-
 public class Post {
     private String id;
     private String name;
@@ -11,6 +9,11 @@ public class Post {
 
     public Post() {
 
+    }
+
+    public Post(String link, String text) {
+        this.link = link;
+        this.text = text;
     }
 
     public Post(String id, String name, String text, String link, String created) {
