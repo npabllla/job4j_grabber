@@ -5,9 +5,11 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -27,6 +29,12 @@ public class SqlRuParse {
                 Element href = td.child(0);
                 System.out.println(href.attr("href"));
                 System.out.println(href.text());
+            }
+            for (int i = 0; i < row.size(); i++) {
+                if (i > 2) {
+                    Element href = row.get(i).child(0);
+                    System.out.println(getDescription(href));
+                }
             }
             Elements rw = doc.select(".altCol");
             for (int i = 1; i < rw.size(); i++) {
@@ -66,5 +74,13 @@ public class SqlRuParse {
     private static Date transformToDate(String date) throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yy, HH:mm", new Locale("ru"));
         return dateFormat.parse(date);
+    }
+
+    private static String getDescription(Element href) throws IOException {
+        String link = href.attr("href");
+        System.out.println(link);
+        Document tempDoc = Jsoup.parse(new URL(link), 3000);
+        Element table = tempDoc.select("table[class=msgTable]").first();
+        return table.select("td[class=msgBody]").get(1).text();
     }
 }
