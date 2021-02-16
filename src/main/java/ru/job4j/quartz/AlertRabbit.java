@@ -24,14 +24,14 @@ public class AlertRabbit {
             scheduler.start();
             try (InputStream in = new FileInputStream("./src/main/resources/rabbit.properties")) {
                 properties.load(in);
-                Class.forName(properties.getProperty("driver-class-name"));
-                String url = properties.getProperty("url");
-                String login = properties.getProperty("login");
-                String password = properties.getProperty("password");
-                connection = DriverManager.getConnection(url, login, password);
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            Class.forName(properties.getProperty("driver-class-name"));
+            String url = properties.getProperty("url");
+            String login = properties.getProperty("login");
+            String password = properties.getProperty("password");
+            connection = DriverManager.getConnection(url, login, password);
             JobDataMap data = new JobDataMap();
             data.put("connection", connection);
             JobDetail job = newJob(Rabbit.class)
