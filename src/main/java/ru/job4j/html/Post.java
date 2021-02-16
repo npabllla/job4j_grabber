@@ -7,9 +7,29 @@ public class Post {
     private String description;
     private String date;
 
+    public Post() {
+
+    }
     public Post(String link, String description, String date) {
         this.link = link;
         this.description = description;
+        this.date = date;
+    }
+
+    public Post(String link, String description) {
+        this.link = link;
+        this.description = description;
+    }
+
+    public void setLink(String link) {
+        this.link = link;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setDate(String date) {
         this.date = date;
     }
 
