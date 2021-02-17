@@ -8,29 +8,21 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.net.URL;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class SqlRuParse implements Parse {
     @Override
     public List<Post> list(String link) {
         List<Post> result = new ArrayList<>();
+        Parser parser = new Parser();
         try {
             Document doc = Jsoup.connect(link).get();
             Elements row = doc.select(".postslisttopic");
             for (Element td : row) {
                 Element href = td.child(0);
                 String url = href.attr("href");
-                String text = getDescription(href);
+                String text = parser.getDescription(href);
                 result.add(new Post(url, text));
             }
             Elements rw = doc.select(".altCol");
@@ -40,7 +32,7 @@ public class SqlRuParse implements Parse {
                     Element temp = rw.get(i);
                     temp.attr("class");
                     String parsedDate = temp.text();
-                    String date = parser(parsedDate);
+                    String date = parser.parser(parsedDate);
                     dates.add(date);
                 }
             }
@@ -58,51 +50,17 @@ public class SqlRuParse implements Parse {
     @Override
     public Post detail(String link) {
         Post result = new Post();
+        Parser parser = new Parser();
         result.setLink(link);
         try {
             Document document = Jsoup.parse(new URL(link), 3000);
             Element table = document.select("table[class=msgTable]").first();
             result.setText(table.select("td[class=msgBody]").get(1).text());
             String date = table.select("td[class=msgFooter]").get(0).text().split(" \\[")[0];
-            result.setCreated(parser(date));
+            result.setCreated(parser.parser(date));
         } catch (IOException | ParseException e) {
             e.printStackTrace();
         }
         return result;
-    }
-
-    private static String parser(String date) throws ParseException {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yy HH:mm");
-        if (date.split(",")[0].equals("сегодня")) {
-            String parsedDateToday = LocalDateTime.now().format(formatter);
-            return replaceTime(date, parsedDateToday);
-        } else if (date.split(",")[0].equals("вчера")) {
-            String parsedDateYesterday = LocalDateTime.now().minusDays(1).format(formatter);
-            return replaceTime(date, parsedDateYesterday);
-        } else {
-            return transformToDate(date).toInstant()
-                    .atZone(ZoneId.systemDefault())
-                    .toLocalDateTime()
-                    .format(formatter);
-        }
-    }
-
-    private static String replaceTime(String date, String parsedDate) {
-        String time = LocalTime.parse(date.split(", ")[1]).toString();
-        Pattern pattern = Pattern.compile("\\d{2}:\\d{2}");
-        Matcher matcher = pattern.matcher(parsedDate);
-        return matcher.replaceAll(time);
-    }
-
-    private static Date transformToDate(String date) throws ParseException {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yy, HH:mm", new Locale("ru"));
-        return dateFormat.parse(date);
-    }
-
-    private static String getDescription(Element href) throws IOException {
-        String link = href.attr("href");
-        Document tempDoc = Jsoup.parse(new URL(link), 3000);
-        Element table = tempDoc.select("table[class=msgTable]").first();
-        return table.select("td[class=msgBody]").get(1).text();
     }
 }
